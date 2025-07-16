@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, Zap, Shield, LogOut } from 'lucide-react';
+import { Cpu, Zap, Shield, LogOut, Filter } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 import { Expense, NewExpense, ExpenseFilters } from './types/expense';
 import { ExpenseForm } from './components/ExpenseForm';
@@ -21,6 +21,9 @@ function App() {
     dateTo: '',
   });
   const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
+
+  // Новое состояние для показа/скрытия фильтра
+  const [filtersVisible, setFiltersVisible] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -119,12 +122,9 @@ function App() {
 
   return (
     <div className="relative min-h-screen bg-[#0A0A23] text-white font-sans overflow-hidden">
-      {/* Киберпанковый анимированный фон */}
       <CyberpunkBackground />
 
-      {/* Основной контент */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
-        {/* Заголовок */}
         <div className="text-center mb-12 select-none">
           <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
             <div className="flex items-center gap-4">
@@ -167,20 +167,35 @@ function App() {
           </p>
         </div>
 
-        {/* Щомісячний огляд */}
         <MonthlyOverview expenses={expenses} />
 
-        {/* Контентная сетка */}
+        {/* Кнопка-переключатель фильтра */}
+        <button
+          onClick={() => setFiltersVisible(!filtersVisible)}
+          className="mb-6 cyber-button flex items-center gap-2 px-4 py-2 rounded-md text-cyan-400 border border-cyan-400 hover:bg-cyan-400/10 transition"
+          aria-label={filtersVisible ? 'Приховати фільтри' : 'Показати фільтри'}
+        >
+          <Filter size={20} />
+          {filtersVisible ? 'Приховати фільтри' : 'Показати фільтри'}
+        </button>
+
+        {/* Плавное сворачивание фильтра */}
+        <div
+          className={`transition-[max-height,opacity] duration-500 ease-in-out overflow-hidden ${
+            filtersVisible ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <ExpenseFiltersComponent
+            filters={filters}
+            onFiltersChange={setFilters}
+            totalExpenses={expenses.length}
+            filteredExpenses={filteredExpenses.length}
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-8">
             <ExpenseForm onAddExpense={handleAddExpense} />
-
-            <ExpenseFiltersComponent
-              filters={filters}
-              onFiltersChange={setFilters}
-              totalExpenses={expenses.length}
-              filteredExpenses={filteredExpenses.length}
-            />
           </div>
 
           <div className="lg:col-span-2 space-y-8">
@@ -200,12 +215,12 @@ function App() {
           </div>
         </div>
 
-        {/* Футер */}
         <footer className="mt-20 text-center select-none">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
             <p className="text-purple-300 font-mono text-sm max-w-xl">
-              Дані зашифровані та збережені локально. Зовнішні протоколи передачі даних відсутні.
+              Дані зашифровані та збережені локально. Зовнішні протоколи передачі даних
+              відсутні.
             </p>
             <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
           </div>

@@ -76,7 +76,12 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                     {expense.comment && (
                       <div className="flex items-center gap-1">
                         <MessageSquare size={14} className="text-pink-400" />
-                        <span className="truncate max-w-xs text-pink-300">// {expense.comment}</span>
+                        <span
+                          className="max-w-xs text-pink-300 break-words whitespace-normal"
+                          title={expense.comment}
+                        >
+  // {expense.comment}
+                        </span>
                       </div>
                     )}
                   </div>

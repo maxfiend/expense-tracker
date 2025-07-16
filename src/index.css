@@ -303,7 +303,8 @@ body::before {
   display: block;
   width: 24px;
   height: 3px;
-  background-color: #22d3ee; /* cyan-400 */
+  background-color: #22d3ee;
+  /* cyan-400 */
   border-radius: 2px;
   transition: transform 0.4s ease, opacity 0.4s ease;
   transform-origin: center;
@@ -324,7 +325,14 @@ body::before {
   transform: translateY(-8px) rotate(-45deg);
 }
 
+.break-words {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
 
 @keyframes glitch-1 {
 

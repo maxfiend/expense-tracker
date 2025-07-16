@@ -15,19 +15,20 @@ export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) =>
   const currentMonth = monthlyTotals[0];
   const previousMonth = monthlyTotals[1];
 
-  const monthlyChange = currentMonth && previousMonth 
-    ? ((currentMonth.total - previousMonth.total) / previousMonth.total) * 100 
+  const monthlyChange = currentMonth && previousMonth
+    ? ((currentMonth.total - previousMonth.total) / previousMonth.total) * 100
     : 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* Цього місяця */}
       <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Цього місяця</p>
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Цього місяця</p>
-            <p className="text-3xl font-bold text-green-400 neon-text font-mono">{formatCurrency(currentMonthTotal)}</p>
-          </div>
-          <div className="p-4 bg-cyan-500/20 rounded-full border border-cyan-500/50">
+          <p className="text-3xl font-bold text-green-400 neon-text font-mono whitespace-nowrap overflow-hidden text-ellipsis">
+            {formatCurrency(currentMonthTotal)}
+          </p>
+          <div className="p-4 bg-cyan-500/20 rounded-full border border-cyan-500/50 flex-shrink-0">
             <Calendar className="w-8 h-8 text-cyan-400" />
           </div>
         </div>
@@ -45,13 +46,14 @@ export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) =>
         )}
       </div>
 
+      {/* Загальні витрати */}
       <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Загальні витрати</p>
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Загальні витрати</p>
-            <p className="text-3xl font-bold text-green-400 neon-text font-mono">{formatCurrency(totalExpenses)}</p>
-          </div>
-          <div className="p-4 bg-green-500/20 rounded-full border border-green-500/50">
+          <p className="text-3xl font-bold text-green-400 neon-text font-mono whitespace-nowrap overflow-hidden text-ellipsis">
+            {formatCurrency(totalExpenses)}
+          </p>
+          <div className="p-4 bg-green-500/20 rounded-full border border-green-500/50 flex-shrink-0">
             <DollarSign className="w-8 h-8 text-green-400" />
           </div>
         </div>
@@ -60,29 +62,27 @@ export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) =>
         </p>
       </div>
 
+      {/* Середньомісячні витрати */}
       <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Середньомісячні витрати</p>
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Середньомісячні витрати</p>
-            <p className="text-3xl font-bold text-green-400 neon-text font-mono">
-              {formatCurrency(monthlyTotals.length > 0 ? totalExpenses / monthlyTotals.length : 0)}
-            </p>
-          </div>
-          <div className="p-4 bg-yellow-500/20 rounded-full border border-yellow-500/50">
+          <p className="text-3xl font-bold text-green-400 neon-text font-mono whitespace-nowrap overflow-hidden text-ellipsis">
+            {formatCurrency(monthlyTotals.length > 0 ? totalExpenses / monthlyTotals.length : 0)}
+          </p>
+          <div className="p-4 bg-yellow-500/20 rounded-full border border-yellow-500/50 flex-shrink-0">
             <Activity className="w-8 h-8 text-yellow-400" />
           </div>
         </div>
       </div>
 
+      {/* Середня сума витрати */}
       <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Середня сума витрати</p>
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Середня сума витрати</p>
-            <p className="text-3xl font-bold text-green-400 neon-text font-mono">
-              {formatCurrency(expenses.length > 0 ? totalExpenses / expenses.length : 0)}
-            </p>
-          </div>
-          <div className="p-4 bg-purple-500/20 rounded-full border border-purple-500/50">
+          <p className="text-3xl font-bold text-green-400 neon-text font-mono whitespace-nowrap overflow-hidden text-ellipsis">
+            {formatCurrency(expenses.length > 0 ? totalExpenses / expenses.length : 0)}
+          </p>
+          <div className="p-4 bg-purple-500/20 rounded-full border border-purple-500/50 flex-shrink-0">
             <Target className="w-8 h-8 text-purple-400" />
           </div>
         </div>

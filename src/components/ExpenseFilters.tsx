@@ -25,11 +25,13 @@ export const ExpenseFiltersComponent: React.FC<ExpenseFiltersProps> = ({
   const hasActiveFilters = filters.category || filters.dateFrom || filters.dateTo;
 
   return (
-    <div className="cyber-card rounded-lg p-6 shadow-2xl">
-      <div className="flex items-center justify-between mb-4">
+    <div className="cyber-card rounded-lg p-6 shadow-2xl flex flex-col items-center md:items-start">
+      <div className="flex items-center justify-between w-full mb-4 flex-col sm:flex-row gap-2">
         <div className="flex items-center gap-2">
           <Search size={20} className="text-cyan-400" />
-          <h3 className="font-bold text-cyan-400 neon-text font-mono uppercase tracking-wide">Фільтри</h3>
+          <h3 className="font-bold text-cyan-400 neon-text font-mono uppercase tracking-wide text-center sm:text-left">
+            Фільтри
+          </h3>
         </div>
         {hasActiveFilters && (
           <button
@@ -42,7 +44,7 @@ export const ExpenseFiltersComponent: React.FC<ExpenseFiltersProps> = ({
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-center md:text-left">
         <div>
           <label className="block text-sm font-medium text-purple-400 mb-2 uppercase tracking-wide">
             Категорія
@@ -86,10 +88,10 @@ export const ExpenseFiltersComponent: React.FC<ExpenseFiltersProps> = ({
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-cyan-500/30">
+      <div className="mt-6 pt-4 border-t border-cyan-500/30 w-full text-center md:text-left">
         <p className="text-sm text-purple-300 font-mono">
-          {/* // Showing X of Y expenses */}
-          // Показано <span className="text-cyan-400 font-bold">{filteredExpenses}</span> з <span className="text-cyan-400 font-bold">{totalExpenses}</span> витрат
+          // Показано <span className="text-cyan-400 font-bold">{filteredExpenses}</span> з{' '}
+          <span className="text-cyan-400 font-bold">{totalExpenses}</span> витрат
         </p>
       </div>
     </div>

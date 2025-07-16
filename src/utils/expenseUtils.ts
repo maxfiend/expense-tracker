@@ -5,12 +5,14 @@ export const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
-export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('uk-UA', {
+export function formatCurrency(amount: number): string {
+  return amount.toLocaleString('uk-UA', {
     style: 'currency',
     currency: 'UAH',
-  }).format(amount);
-};
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
 
 export const getDefaultCategories = (): string[] => [
   'Їжа', 'Транспорт', 'Розваги', 'Здоров’я', 'Освіта', 'Покупки', 'Інше'

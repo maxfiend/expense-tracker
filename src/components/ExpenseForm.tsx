@@ -1,29 +1,35 @@
-import React, { useState } from 'react';
-import { Plus, X, Zap } from 'lucide-react';
-import { Expense, NewExpense } from '../types/expense';
+import React, { useState, useEffect } from 'react';
+import { Plus, Zap } from 'lucide-react';
+import { NewExpense } from '../types/expense';
 import { getDefaultCategories } from '../utils/expenseUtils';
 
 interface ExpenseFormProps {
-  onAddExpense: (expense: NewExpense) => void;   // note: no id here
-  editingExpense?: Expense;
-  onUpdateExpense?: (expense: Expense) => void;
-  onCancelEdit?: () => void;
+  onAddExpense: (expense: NewExpense) => void;
 }
 
-export const ExpenseForm: React.FC<ExpenseFormProps> = ({
-  onAddExpense,
-  editingExpense,
-  onUpdateExpense,
-  onCancelEdit,
-}) => {
-  const [amount, setAmount] = useState(editingExpense?.amount?.toString() || '');
-  const [category, setCategory] = useState(editingExpense?.category || '');
+const getTodayDate = (): string => {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzOffset).toISOString().split('T')[0];
+};
+
+export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
-  const [date, setDate] = useState(editingExpense?.date || new Date().toISOString().split('T')[0]);
-  const [comment, setComment] = useState(editingExpense?.comment || '');
+  const [date, setDate] = useState(getTodayDate());
+  const [comment, setComment] = useState('');
   const [showCustomCategory, setShowCustomCategory] = useState(false);
 
   const categories = getDefaultCategories();
+
+  // Обновляем дату при загрузке компонента, если устарела
+  useEffect(() => {
+    const today = getTodayDate();
+    if (date !== today) {
+      setDate(today);
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,16 +38,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
 
     const finalCategory = showCustomCategory ? customCategory : category;
 
-    const expense: Expense | NewExpense = editingExpense
-  ? {
-      id: editingExpense.id,
-      amount: parseFloat(amount),
-      category: finalCategory,
-      date,
-      comment: comment.trim() || undefined,
-      created_at: editingExpense.created_at || new Date().toISOString(),
-    }
-  : {
+    const expense: NewExpense = {
       amount: parseFloat(amount),
       category: finalCategory,
       date,
@@ -49,27 +46,13 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       created_at: new Date().toISOString(),
     };
 
-   if (editingExpense && onUpdateExpense) {
-  onUpdateExpense(expense as Expense);
-} else {
-  onAddExpense(expense as NewExpense);
-}
+    onAddExpense(expense);
 
-    // Скинути форму
+    // Сброс формы с актуальной датой
     setAmount('');
     setCategory('');
     setCustomCategory('');
-    setDate(new Date().toISOString().split('T')[0]);
-    setComment('');
-    setShowCustomCategory(false);
-  };
-
-  const handleCancelEdit = () => {
-    if (onCancelEdit) onCancelEdit();
-    setAmount('');
-    setCategory('');
-    setCustomCategory('');
-    setDate(new Date().toISOString().split('T')[0]);
+    setDate(getTodayDate());
     setComment('');
     setShowCustomCategory(false);
   };
@@ -79,16 +62,8 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-cyan-400 neon-text flex items-center gap-2">
           <Zap size={20} className="text-cyan-400" />
-          {editingExpense ? 'Редагувати витрату' : 'Додати нову витрату'}
+          Додати нову витрату
         </h2>
-        {editingExpense && (
-          <button
-            onClick={handleCancelEdit}
-            className="p-2 cyber-button cyber-danger rounded-md transition-all duration-300"
-          >
-            <X size={16} />
-          </button>
-        )}
       </div>
 
       <form
@@ -157,7 +132,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -176,7 +151,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
               <button
                 type="button"
                 onClick={() => setShowCustomCategory(true)}
-                className="px-4 py-3 cyber-button rounded-md text-sm"
+                className="px-4 py-3 cyber-button rounded-md text-sm self-start sm:self-auto"
               >
                 Власна
               </button>
@@ -202,7 +177,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           className="w-full flex items-center justify-center gap-3 cyber-button cyber-success py-4 px-6 rounded-md font-bold text-lg tracking-wide"
         >
           <Plus size={20} />
-          {editingExpense ? 'Оновити витрату' : 'Додати витрату'}
+          Додати витрату
         </button>
       </form>
     </div>

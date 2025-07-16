@@ -10,6 +10,7 @@ import { MonthlyOverview } from './components/MonthlyOverview';
 import { filterExpenses, getUkrainianPlural } from './utils/expenseUtils';
 import { supabase } from './supabaseClient';
 import { Auth } from './components/Auth';
+import { CyberpunkBackground } from './components/CyberpunkCityBackground';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -19,10 +20,8 @@ function App() {
     dateFrom: '',
     dateTo: '',
   });
-  const [editingExpense, setEditingExpense] = useState<Expense | undefined>();
   const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
 
-  // Получаем пользователя при загрузке и подписываемся на изменения авторизации
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
@@ -40,20 +39,18 @@ function App() {
     };
   }, []);
 
-  // Выход
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
-  // Загрузка расходов
   const fetchExpenses = async () => {
     if (!user) return;
 
     const { data, error } = await supabase
       .from('expenses')
       .select('*')
-      .order('date', { ascending: false })
+      .order('created_at', { ascending: false })
       .eq('user_id', user.id);
 
     if (error) {
@@ -84,31 +81,7 @@ function App() {
     if (error) {
       console.error('Ошибка добавления:', error);
     } else if (data && data.length > 0) {
-      setExpenses(prev => [data[0], ...prev]);
-    }
-  };
-
-  const handleUpdateExpense = async (expense: Expense) => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('expenses')
-      .update({
-        amount: expense.amount,
-        category: expense.category,
-        date: expense.date,
-        comment: expense.comment,
-        created_at: expense.created_at,
-      })
-      .eq('id', expense.id)
-      .eq('user_id', user.id)
-      .select();
-
-    if (error) {
-      console.error('Ошибка обновления:', error);
-    } else if (data && data.length > 0) {
-      setExpenses(prev => prev.map(e => (e.id === expense.id ? data[0] : e)));
-      setEditingExpense(undefined);
+      setExpenses((prev) => [data[0], ...prev]);
     }
   };
 
@@ -125,69 +98,70 @@ function App() {
     if (error) {
       console.error('Ошибка удаления:', error);
     } else {
-      setExpenses(prev => prev.filter(exp => exp.id !== id));
+      setExpenses((prev) => prev.filter((exp) => exp.id !== id));
     }
-  };
-
-  const handleEditExpense = (expense: Expense) => {
-    setEditingExpense(expense);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingExpense(undefined);
   };
 
   const filteredExpenses = filterExpenses(expenses, filters);
   const sortedExpenses = filteredExpenses.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) =>
+      new Date(b.created_at || b.date).getTime() -
+      new Date(a.created_at || a.date).getTime()
   );
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A23]">
         <Auth />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="relative min-h-screen bg-[#0A0A23] text-white font-sans overflow-hidden">
+      {/* Киберпанковый анимированный фон */}
+      <CyberpunkBackground />
+
+      {/* Основной контент */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
         {/* Заголовок */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 select-none">
           <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
             <div className="flex items-center gap-4">
-              <div className="p-4 bg-cyan-500/20 rounded-full border border-cyan-500/50 shadow-lg">
+              <div className="p-4 bg-cyan-500/20 rounded-full border border-cyan-500/50 shadow-lg backdrop-blur-sm">
                 <Cpu className="w-12 h-12 text-cyan-400" />
               </div>
               <h1
-                className="glitch text-5xl font-bold text-cyan-400 neon-text"
+                className="glitch text-5xl font-extrabold mb-6 text-center md:text-left leading-tight"
                 data-text="ТРЕКЕР ВИТРАТ"
+                style={{
+                  textShadow:
+                    '0 0 5px #00fff7, 0 0 10px #00fff7, 0 0 20px #00fff7, 0 0 40px #ff0080',
+                }}
               >
                 ТРЕКЕР ВИТРАТ
               </h1>
-              <div className="p-4 bg-purple-500/20 rounded-full border border-purple-500/50 shadow-lg">
+              <div className="p-4 bg-purple-500/20 rounded-full border border-purple-500/50 shadow-lg backdrop-blur-sm">
                 <Shield className="w-12 h-12 text-purple-400" />
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="cyber-button px-4 py-2 text-sm font-bold text-red-400 border border-red-400 hover:bg-red-500/10 transition-all duration-300 rounded-md flex items-center gap-2"
+              className="cyber-button px-5 py-2 text-sm font-bold text-red-400 border border-red-400 hover:bg-red-500/20 transition-all duration-300 rounded-md flex items-center gap-2 whitespace-nowrap"
               title="Вийти з акаунту"
             >
-              <LogOut size={16} />
+              <LogOut size={18} />
               Вийти
             </button>
           </div>
 
-          <p className="text-purple-300 max-w-3xl mx-auto text-lg font-mono leading-relaxed">
-            <br />
-            <span className="text-cyan-400">
+          <p className="text-purple-300 max-w-3xl mx-auto text-lg font-mono leading-relaxed tracking-wide">
+            <span className="text-cyan-400 font-semibold">
               Ініціалізація протоколів відстеження витрат і аналіз моделей витрачання
             </span>
             <br />
-            <span className="text-pink-400">
+            <span className="text-pink-400 font-semibold">
               для оптимального розподілу ресурсів та фінансової оптимізації
             </span>
           </p>
@@ -196,16 +170,10 @@ function App() {
         {/* Щомісячний огляд */}
         <MonthlyOverview expenses={expenses} />
 
-        {/* Основна сітка контенту */}
+        {/* Контентная сетка */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Ліва колонка — форма та фільтри */}
           <div className="lg:col-span-1 space-y-8">
-            <ExpenseForm
-              onAddExpense={handleAddExpense}
-              editingExpense={editingExpense}
-              onUpdateExpense={handleUpdateExpense}
-              onCancelEdit={handleCancelEdit}
-            />
+            <ExpenseForm onAddExpense={handleAddExpense} />
 
             <ExpenseFiltersComponent
               filters={filters}
@@ -215,11 +183,9 @@ function App() {
             />
           </div>
 
-          {/* Права колонка — список та графіки */}
           <div className="lg:col-span-2 space-y-8">
             <ExpenseList
               expenses={sortedExpenses}
-              onEditExpense={handleEditExpense}
               onDeleteExpense={handleDeleteExpense}
             />
 
@@ -235,16 +201,16 @@ function App() {
         </div>
 
         {/* Футер */}
-        <div className="mt-20 text-center">
+        <footer className="mt-20 text-center select-none">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Zap className="w-5 h-5 text-yellow-400" />
-            <p className="text-purple-300 font-mono text-sm">
+            <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
+            <p className="text-purple-300 font-mono text-sm max-w-xl">
               Дані зашифровані та збережені локально. Зовнішні протоколи передачі даних відсутні.
             </p>
-            <Zap className="w-5 h-5 text-yellow-400" />
+            <Zap className="w-5 h-5 text-yellow-400 animate-pulse" />
           </div>
-          <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent mx-auto"></div>
-        </div>
+          <div className="w-32 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent mx-auto rounded" />
+        </footer>
       </div>
     </div>
   );

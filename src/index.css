@@ -41,7 +41,7 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
+  background-image:
     linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
@@ -51,17 +51,27 @@ body::before {
 
 /* Neon glow animations */
 @keyframes neonGlow {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
   }
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Custom scrollbar */
@@ -176,8 +186,13 @@ body::before {
 }
 
 @keyframes scanLine {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+
+  100% {
+    left: 100%;
+  }
 }
 
 .category-badge {
@@ -212,10 +227,10 @@ body::before {
   right: 0;
   bottom: 0;
   left: 0;
-  background: linear-gradient(45deg, 
-    rgba(0, 212, 255, 0.02) 0%, 
-    transparent 50%, 
-    rgba(179, 71, 217, 0.02) 100%);
+  background: linear-gradient(45deg,
+      rgba(0, 212, 255, 0.02) 0%,
+      transparent 50%,
+      rgba(179, 71, 217, 0.02) 100%);
   pointer-events: none;
 }
 
@@ -270,20 +285,79 @@ body::before {
   z-index: -2;
 }
 
+.cyber-select,
+.cyber-input {
+  height: 48px;
+  /* или 3rem (48px) — подстраивай под твой padding */
+  line-height: 1.2;
+}
+
+.burger-button {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.burger-line {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background-color: #22d3ee; /* cyan-400 */
+  border-radius: 2px;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  transform-origin: center;
+}
+
+/* Верхняя линия */
+.burger-line.top.open {
+  transform: translateY(8px) rotate(45deg);
+}
+
+/* Средняя линия */
+.burger-line.middle.open {
+  opacity: 0;
+}
+
+/* Нижняя линия */
+.burger-line.bottom.open {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+
+
 @keyframes glitch-1 {
-  0%, 14%, 15%, 49%, 50%, 99%, 100% {
+
+  0%,
+  14%,
+  15%,
+  49%,
+  50%,
+  99%,
+  100% {
     transform: translate(0);
   }
-  15%, 49% {
+
+  15%,
+  49% {
     transform: translate(-2px, 1px);
   }
 }
 
 @keyframes glitch-2 {
-  0%, 20%, 21%, 62%, 63%, 99%, 100% {
+
+  0%,
+  20%,
+  21%,
+  62%,
+  63%,
+  99%,
+  100% {
     transform: translate(0);
   }
-  21%, 62% {
+
+  21%,
+  62% {
     transform: translate(2px, -1px);
   }
 }
@@ -300,7 +374,9 @@ body::before {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive adjustments */
@@ -308,8 +384,21 @@ body::before {
   .cyber-card {
     margin: 0.5rem;
   }
-  
+
   .stat-card {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+
+  input,
+  button {
+    width: 100%;
+    font-size: 1.1rem;
     margin-bottom: 1rem;
   }
 }

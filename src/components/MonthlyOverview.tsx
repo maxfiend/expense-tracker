@@ -1,0 +1,92 @@
+import React from 'react';
+import { TrendingUp, TrendingDown, Calendar, DollarSign, Activity, Target } from 'lucide-react';
+import { Expense } from '../types/expense';
+import { getCurrentMonthTotal, getMonthlyTotals, formatCurrency } from '../utils/expenseUtils';
+
+interface MonthlyOverviewProps {
+  expenses: Expense[];
+}
+
+export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) => {
+  const currentMonthTotal = getCurrentMonthTotal(expenses);
+  const monthlyTotals = getMonthlyTotals(expenses);
+  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+
+  const currentMonth = monthlyTotals[0];
+  const previousMonth = monthlyTotals[1];
+
+  const monthlyChange = currentMonth && previousMonth 
+    ? ((currentMonth.total - previousMonth.total) / previousMonth.total) * 100 
+    : 0;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Цього місяця</p>
+            <p className="text-3xl font-bold text-green-400 neon-text font-mono">{formatCurrency(currentMonthTotal)}</p>
+          </div>
+          <div className="p-4 bg-cyan-500/20 rounded-full border border-cyan-500/50">
+            <Calendar className="w-8 h-8 text-cyan-400" />
+          </div>
+        </div>
+        {monthlyChange !== 0 && (
+          <div className="mt-3 flex items-center">
+            {monthlyChange > 0 ? (
+              <TrendingUp className="w-5 h-5 text-red-400 mr-2" />
+            ) : (
+              <TrendingDown className="w-5 h-5 text-green-400 mr-2" />
+            )}
+            <span className={`text-sm font-mono font-bold ${monthlyChange > 0 ? 'text-red-400' : 'text-green-400'}`}>
+              {Math.abs(monthlyChange).toFixed(1)}% порівняно з минулим місяцем
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Загальні витрати</p>
+            <p className="text-3xl font-bold text-green-400 neon-text font-mono">{formatCurrency(totalExpenses)}</p>
+          </div>
+          <div className="p-4 bg-green-500/20 rounded-full border border-green-500/50">
+            <DollarSign className="w-8 h-8 text-green-400" />
+          </div>
+        </div>
+        <p className="text-sm text-purple-300 mt-3 font-mono">
+          Всього {expenses.length} витрат{expenses.length !== 1 ? 'и' : ''}
+        </p>
+      </div>
+
+      <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Середньомісячні витрати</p>
+            <p className="text-3xl font-bold text-green-400 neon-text font-mono">
+              {formatCurrency(monthlyTotals.length > 0 ? totalExpenses / monthlyTotals.length : 0)}
+            </p>
+          </div>
+          <div className="p-4 bg-yellow-500/20 rounded-full border border-yellow-500/50">
+            <Activity className="w-8 h-8 text-yellow-400" />
+          </div>
+        </div>
+      </div>
+
+      <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">Середня сума витрати</p>
+            <p className="text-3xl font-bold text-green-400 neon-text font-mono">
+              {formatCurrency(expenses.length > 0 ? totalExpenses / expenses.length : 0)}
+            </p>
+          </div>
+          <div className="p-4 bg-purple-500/20 rounded-full border border-purple-500/50">
+            <Target className="w-8 h-8 text-purple-400" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

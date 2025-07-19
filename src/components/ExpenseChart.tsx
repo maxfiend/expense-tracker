@@ -202,8 +202,9 @@ export const ExpenseChart: React.FC<ExpenseChartProps> = ({
       <div className="mt-6 pt-4 border-t border-cyan-500/30">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono">
-    // Розподіл за категоріями
+            Розподіл за категоріями
           </h4>
+          <div className="arrow text-green-400 neon-text">➡</div>
           <ToggleBurgerButton
             isOpen={showList}
             onClick={() => setShowList(!showList)}

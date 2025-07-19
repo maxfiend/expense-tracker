@@ -164,12 +164,12 @@ function App() {
       <CyberpunkBackground />
 
       {/* Основной контент поверх */}
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-4 lg:py-20">
         {/* Заголовок и кнопки */}
         <div className="text-center mb-4 sm:mb-10 select-none">
           <div className="relative mb-6 pt-12 md:pt-0">
             {/* Мобильная кнопка выхода */}
-            <div className="absolute right-4 top-2 z-20 md:hidden">
+            <div className="absolute right-0 top-2 z-20 md:hidden">
               <button
                 onClick={handleLogout}
                 className="cyber-button px-4 py-2 text-sm font-bold text-red-400 border border-red-400 hover:bg-red-500/20 transition-all duration-300 rounded-md flex items-center gap-2 whitespace-nowrap"
@@ -244,7 +244,12 @@ function App() {
         )}
 
         {(!isMobile || showMonthlyOverview) && (
-          <MonthlyOverview expenses={expenses} />
+          <div
+            className={`transition-[max-height,opacity] ease-in-out duration-2000 overflow-hidden ${showMonthlyOverview ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+              }`}
+          >
+            <MonthlyOverview expenses={expenses} />
+          </div>
         )}
 
         <button

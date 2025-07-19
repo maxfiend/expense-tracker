@@ -30,7 +30,7 @@ export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) =>
             {formatCurrency(totalExpenses)}
           </p>
           <div className="w-16 h-16 bg-green-500/20 rounded-full border border-green-500/50 flex items-center justify-center flex-shrink-0">
-            <span className="text-green-400 text-4xl font-mono leading-none select-none">
+            <span className="text-green-400 text-4xl font-mono leading-none select-none font-[monospace,Segoe UI Symbol,sans-serif]">
               ₴
             </span>
           </div>

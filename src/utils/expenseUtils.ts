@@ -15,13 +15,13 @@ export function formatCurrency(amount: number): string {
 }
 
 export const getDefaultCategories = (): string[] => [
-  'Їжа', 'Транспорт', 'Розваги', 'Здоров’я', 'Освіта', 'Покупки', 'Інше'
-];
+  'Їжа', 'Транспорт', 'Розваги', 'Здоров’я', 'Освіта', 'Покупки',
+].sort((a, b) => a.localeCompare(b, 'uk'));
 
 export const filterExpenses = (expenses: Expense[], filters: ExpenseFilters): Expense[] => {
   return expenses.filter(expense => {
     const matchesCategory = !filters.category || expense.category === filters.category;
-    
+
     let matchesDate = true;
     if (filters.dateFrom || filters.dateTo) {
       const expenseDate = new Date(expense.date);
@@ -29,18 +29,18 @@ export const filterExpenses = (expenses: Expense[], filters: ExpenseFilters): Ex
       const toDate = filters.dateTo ? new Date(filters.dateTo) : new Date('2100-12-31');
       matchesDate = isWithinInterval(expenseDate, { start: fromDate, end: toDate });
     }
-    
+
     return matchesCategory && matchesDate;
   });
 };
 
 export const getMonthlyTotals = (expenses: Expense[]): MonthlyTotal[] => {
   const monthlyMap = new Map<string, MonthlyTotal>();
-  
+
   expenses.forEach(expense => {
     const monthKey = format(new Date(expense.date), 'yyyy-MM');
     const monthLabel = format(new Date(expense.date), 'MMM yyyy');
-    
+
     if (monthlyMap.has(monthKey)) {
       const existing = monthlyMap.get(monthKey)!;
       existing.total += expense.amount;
@@ -53,13 +53,13 @@ export const getMonthlyTotals = (expenses: Expense[]): MonthlyTotal[] => {
       });
     }
   });
-  
+
   return Array.from(monthlyMap.values()).sort((a, b) => b.month.localeCompare(a.month));
 };
 
 export const getCategoryTotals = (expenses: Expense[]): { category: string; total: number; count: number }[] => {
   const categoryMap = new Map<string, { total: number; count: number }>();
-  
+
   expenses.forEach(expense => {
     if (categoryMap.has(expense.category)) {
       const existing = categoryMap.get(expense.category)!;
@@ -72,7 +72,7 @@ export const getCategoryTotals = (expenses: Expense[]): { category: string; tota
       });
     }
   });
-  
+
   return Array.from(categoryMap.entries())
     .map(([category, data]) => ({ category, ...data }))
     .sort((a, b) => b.total - a.total);
@@ -82,7 +82,7 @@ export const getCurrentMonthTotal = (expenses: Expense[]): number => {
   const currentMonth = new Date();
   const start = startOfMonth(currentMonth);
   const end = endOfMonth(currentMonth);
-  
+
   return expenses
     .filter(expense => {
       const expenseDate = new Date(expense.date);

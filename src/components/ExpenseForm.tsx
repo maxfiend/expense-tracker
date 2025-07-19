@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Zap, Trash2 } from 'lucide-react';
 import { NewExpense } from '../types/expense';
-import { getDefaultCategories } from '../utils/expenseUtils';
+import { CustomCategoryInput } from './CustomCategoryInputProps';
+import { ChevronDown } from 'lucide-react';
 
 interface ExpenseFormProps {
   onAddExpense: (expense: NewExpense) => void;
+  categories: string[];
+  setCategories: React.Dispatch<React.SetStateAction<string[]>>;
+  onDeleteCategory: (categoryToDelete: string) => void;
 }
 
 const getTodayDate = (): string => {
@@ -13,17 +17,43 @@ const getTodayDate = (): string => {
   return new Date(now.getTime() - tzOffset).toISOString().split('T')[0];
 };
 
-export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
+export const ExpenseForm: React.FC<ExpenseFormProps> = ({
+  onAddExpense,
+  categories,
+  setCategories,
+  onDeleteCategory,
+}) => {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [customCategory, setCustomCategory] = useState('');
   const [date, setDate] = useState(getTodayDate());
   const [comment, setComment] = useState('');
   const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [showCategoryList, setShowCategoryList] = useState(false);
 
-  const categories = getDefaultCategories();
+  const [contextCategory, setContextCategory] = useState<string | null>(null);
+  const [contextMenuVisible, setContextMenuVisible] = useState(false);
 
-  // Обновляем дату при загрузке компонента, если устарела
+  // Новый стейт для ошибки
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setShowCategoryList(false);
+        setContextMenuVisible(false);
+        setContextCategory(null);
+      }
+    };
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const today = getTodayDate();
     if (date !== today) {
@@ -31,34 +61,92 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (category && !categories.includes(category)) {
+      setCategory('');
+    }
+  }, [category, categories]);
+
+  const formatCategory = (input: string) => {
+    if (!input) return '';
+    const trimmed = input.trim();
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+  };
+
+  const handleAddCustomCategory = () => {
+    const rawInput = customCategory.trim();
+    const isUkrainianText = (text: string) =>
+      /^[А-ЩЬЮЯЄІЇҐа-щьюяєіїґ'’\-\s]+$/.test(text.trim());
+
+    if (!rawInput) {
+      setErrorMessage('Введіть категорію');
+      return;
+    }
+
+    if (!isUkrainianText(rawInput)) {
+      setErrorMessage('Категорія має містити лише українські літери та пробіли');
+      return;
+    }
+
+    const formatted = formatCategory(rawInput);
+
+    if (categories.includes(formatted)) {
+      setErrorMessage('Така категорія вже існує');
+      return;
+    }
+
+    setCategories((prev) =>
+      [...prev, formatted].sort((a, b) => a.localeCompare(b, 'uk'))
+    );
+
+    setCategory(formatted);
+    setShowCustomCategory(false);
+    setCustomCategory('');
+  };
+
+  const handleDeleteCategoryClick = () => {
+    if (contextCategory) {
+      onDeleteCategory(contextCategory);
+      setContextCategory(null);
+      setContextMenuVisible(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!amount || !(showCustomCategory ? customCategory : category)) return;
+    const chosenCategory = showCustomCategory
+      ? formatCategory(customCategory)
+      : category;
 
-    const finalCategory = showCustomCategory ? customCategory : category;
+    if (!amount || !chosenCategory) {
+      setErrorMessage('Введіть суму і категорію');
+      return;
+    }
 
     const expense: NewExpense = {
       amount: parseFloat(amount),
-      category: finalCategory,
+      category: chosenCategory,
       date,
       comment: comment.trim() || undefined,
       created_at: new Date().toISOString(),
     };
 
     onAddExpense(expense);
-
-    // Сброс формы с актуальной датой
     setAmount('');
     setCategory('');
     setCustomCategory('');
     setDate(getTodayDate());
     setComment('');
     setShowCustomCategory(false);
+    setShowCategoryList(false);
   };
 
   return (
-    <div className="cyber-card rounded-lg p-6 shadow-2xl">
+    <div
+      className="cyber-card rounded-lg p-6 shadow-2xl relative neon-scan"
+      ref={containerRef}
+    >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-cyan-400 neon-text flex items-center gap-2">
           <Zap size={20} className="text-cyan-400" />
@@ -86,7 +174,7 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
             </label>
             <input
               type="number"
-              step="0.01"
+              step="1"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full px-4 py-3 cyber-input rounded-md font-mono text-cyan-300"
@@ -113,47 +201,103 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
           <label className="block text-sm font-medium text-purple-400 mb-2 uppercase tracking-wide">
             Категорія
           </label>
+
           {showCustomCategory ? (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={customCategory}
-                onChange={(e) => setCustomCategory(e.target.value)}
-                className="flex-1 px-4 py-3 cyber-input rounded-md font-mono text-cyan-300"
-                placeholder="Введіть власну категорію"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowCustomCategory(false)}
-                className="px-4 py-3 cyber-button rounded-md"
-              >
-                Відмінити
-              </button>
-            </div>
+            <CustomCategoryInput
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              onSubmit={handleAddCustomCategory}
+              isVisible={showCustomCategory}
+            />
           ) : (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="flex-1 px-4 py-3 cyber-select rounded-md font-mono text-cyan-300"
-                required
+            <div className="relative">
+              <div
+                className="border border-cyan-600 rounded-md cursor-pointer px-3 py-2 select-none flex items-center justify-between"
+                onClick={() => setShowCategoryList((v) => !v)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setShowCategoryList((v) => !v);
+                  }
+                }}
               >
-                <option value="" disabled hidden>
-                  Виберіть категорію
-                </option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                <span
+                  className={`text-cyan-400 ${category ? 'font-semibold text-white' : ''
+                    }`}
+                >
+                  {category || 'Виберіть категорію'}
+                </span>
+                <span
+                  className="absolute right-0 transform text-cyan-400 transition-transform duration-300 ease-in-out"
+                  style={{
+                    transform: showCategoryList
+                      ? 'translateX(-50%) rotate(180deg)'
+                      : 'translateX(-50%) rotate(0deg)'
+                  }}
+                >
+                  <ChevronDown size={18} />
+                </span>
+              </div>
+
+              {showCategoryList && (
+                <div className="flex flex-col gap-1 max-h-40 overflow-auto mt-2 absolute left-0 right-0 z-10 bg-[#121212] border border-cyan-600 rounded-md shadow-lg">
+                  {categories.map((cat) => (
+                    <div
+                      key={cat}
+                      className={`category-item py-1 rounded relative flex items-center justify-between cursor-pointer text-cyan-400 px-4 ${cat === category
+                        ? 'bg-cyan-600 font-semibold'
+                        : 'hover:bg-cyan-400 hover:text-black'
+                        }`}
+                      onClick={() => {
+                        setCategory(cat);
+                        setShowCategoryList(false);
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setContextCategory(cat);
+                        setContextMenuVisible(true);
+                      }}
+                    >
+                      <span>{cat}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setContextCategory(cat);
+                          setContextMenuVisible(true);
+                        }}
+                        className="category-item__delete-btn p-1"
+                        aria-label={`Видалити категорію ${cat}`}
+                        style={{
+                          color: '#ff0055',
+                          textShadow: `
+                           0 0 5px #ff0055,
+                           0 0 10px #ff0055,
+                           0 0 20px #ff3399,
+                           0 0 30px #ff3399,
+                           0 0 40px #ff66cc,
+                           0 0 70px #ff66cc
+                            `,
+                          filter: 'drop-shadow(0 0 5px #ff3399) drop-shadow(0 0 10px #ff66cc)'
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <button
                 type="button"
-                onClick={() => setShowCustomCategory(true)}
-                className="px-4 py-3 cyber-button rounded-md text-sm self-start sm:self-auto"
+                onClick={() => {
+                  setShowCustomCategory(true);
+                  setShowCategoryList(false);
+                }}
+                className="block w-full mt-2 px-4 py-3 cyber-button rounded-md text-sm neon-scan"
               >
-                Власна
+                Власна категорія
               </button>
             </div>
           )}
@@ -180,6 +324,86 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAddExpense }) => {
           Додати витрату
         </button>
       </form>
+
+      {/* Попап подтверждения удаления категории */}
+      {contextMenuVisible && contextCategory && (
+        <div
+          className="fixed z-50 left-1/2 transform -translate-x-1/2 bg-[#222831] border border-cyan-600 rounded-md shadow-lg p-4 w-72"
+          style={{ top: '20%', maxWidth: '90vw' }}
+          onContextMenu={(e) => e.preventDefault()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-category-title"
+        >
+          <div
+            id="delete-category-title"
+            className="mb-3 text-center text-green-400 font-semibold"
+          >
+            Видалити категорію «{contextCategory}» та всі пов’язані витрати?
+          </div>
+          <div className="flex justify-around gap-4">
+            <button
+              onClick={handleDeleteCategoryClick}
+              className="px-2 py-2 cyber-button rounded border hover:bg-gray-600"
+              style={{
+                backgroundColor: '#374151',
+                color: '#ff0055',
+                borderColor: '#ff0055',
+                textShadow: `
+      0 0 1px #ff0055,
+      0 0 1px #ff3399
+    `,
+                filter: 'drop-shadow(0 0 4px #ff3399)'
+              }}
+            >
+              Видалити
+            </button>
+            <button
+              onClick={() => {
+                setContextMenuVisible(false);
+                setContextCategory(null);
+              }}
+              className="px-4 py-3 cyber-button rounded-md text-sm hover:bg-gray-600 neon-scan"
+              style={{
+                borderColor: 'rgba(6, 182, 212, 0.4)',
+                filter: 'drop-shadow(0 0 6px rgba(6, 182, 212, 0.3))',
+              }}
+            >
+              Скасувати
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Модалка ошибки */}
+      {errorMessage && (
+        <div
+          className="fixed z-50 left-1/2 top-1/4 transform -translate-x-1/2 bg-[#222831] border border-red-600 rounded-md shadow-lg p-4 w-72 max-w-[90vw]"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="error-message-title"
+          onClick={() => setErrorMessage(null)} // закрыть при клике вне (можно доработать)
+        >
+          <div
+            id="error-message-title"
+            className="mb-3 text-center text-red-500 font-semibold"
+          >
+            {errorMessage}
+          </div>
+          <div className="flex justify-center">
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="px-4 py-2 cyber-button rounded-md text-sm hover:bg-gray-600 neon-scan"
+              style={{
+                borderColor: 'rgba(255, 0, 0, 0.6)',
+                filter: 'drop-shadow(0 0 6px rgba(255, 0, 0, 0.7))',
+              }}
+            >
+              Закрити
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -21,6 +21,25 @@ export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) =>
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+      {/* Загальні витрати */}
+      <div className="stat-card rounded-lg p-6 shadow-2xl">
+        <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Загальні витрати</p>
+        <div className="flex items-center justify-between">
+          <p className="text-3xl font-bold text-green-400 neon-text font-mono whitespace-nowrap overflow-hidden text-ellipsis">
+            {formatCurrency(totalExpenses)}
+          </p>
+          <div className="w-16 h-16 bg-green-500/20 rounded-full border border-green-500/50 flex items-center justify-center flex-shrink-0">
+            <span className="text-green-400 text-4xl font-mono leading-none select-none">
+              ₴
+            </span>
+          </div>
+        </div>
+        <p className="text-sm text-purple-300 mt-3 font-mono">
+          Всього {expenses.length} витрат{expenses.length !== 1 ? 'и' : ''}
+        </p>
+      </div>
+
       {/* Цього місяця */}
       <div className="stat-card rounded-lg p-6 shadow-2xl">
         <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Цього місяця</p>
@@ -44,22 +63,6 @@ export const MonthlyOverview: React.FC<MonthlyOverviewProps> = ({ expenses }) =>
             </span>
           </div>
         )}
-      </div>
-
-      {/* Загальні витрати */}
-      <div className="stat-card rounded-lg p-6 shadow-2xl">
-        <p className="text-sm font-bold text-purple-400 uppercase tracking-wide font-mono mb-2">Загальні витрати</p>
-        <div className="flex items-center justify-between">
-          <p className="text-3xl font-bold text-green-400 neon-text font-mono whitespace-nowrap overflow-hidden text-ellipsis">
-            {formatCurrency(totalExpenses)}
-          </p>
-          <div className="p-4 bg-green-500/20 rounded-full border border-green-500/50 flex-shrink-0">
-            <DollarSign className="w-8 h-8 text-green-400" />
-          </div>
-        </div>
-        <p className="text-sm text-purple-300 mt-3 font-mono">
-          Всього {expenses.length} витрат{expenses.length !== 1 ? 'и' : ''}
-        </p>
       </div>
 
       {/* Середньомісячні витрати */}
